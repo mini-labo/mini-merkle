@@ -15,7 +15,8 @@
   "license": "MIT",
   "devDependencies": {
     "@napi-rs/cli": "^2.18.3",
-    "ava": "^6.0.1"
+    "ava": "^6.0.1",
+    "ethers": "^5.7.2"
   },
   "ava": {
     "timeout": "3m"
