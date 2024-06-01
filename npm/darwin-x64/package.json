@@ -1,6 +1,6 @@
 {
   "name": "@mini-labo/mini-merkle-darwin-x64",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "os": [
     "darwin"
   ],
@@ -11,8 +11,10 @@
   "files": [
     "mini-merkle.darwin-x64.node"
   ],
+  "description": "small merkle tree builder for mini labo",
   "license": "MIT",
   "engines": {
     "node": ">= 10"
-  }
+  },
+  "repository": "https://github.com/mini-labo/mini-merkle"
 }

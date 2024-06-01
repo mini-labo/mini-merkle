@@ -1,7 +1,7 @@
 {
   "name": "@mini-labo/mini-merkle",
   "version": "0.0.1",
-  "description": "small merkle tree builder for mini-labo",
+  "description": "small merkle tree builder for mini labo",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
@@ -32,5 +32,6 @@
     "universal": "napi universal",
     "version": "napi version"
   },
-  "packageManager": "yarn@4.2.2"
+  "packageManager": "yarn@4.2.2",
+  "repository": "https://github.com/mini-labo/mini-merkle"
 }

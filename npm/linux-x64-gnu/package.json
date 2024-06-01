@@ -1,6 +1,6 @@
 {
   "name": "@mini-labo/mini-merkle-linux-x64-gnu",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "os": [
     "linux"
   ],
@@ -11,10 +11,12 @@
   "files": [
     "mini-merkle.linux-x64-gnu.node"
   ],
+  "description": "small merkle tree builder for mini labo",
   "license": "MIT",
   "engines": {
     "node": ">= 10"
   },
+  "repository": "https://github.com/mini-labo/mini-merkle",
   "libc": [
     "glibc"
   ]
