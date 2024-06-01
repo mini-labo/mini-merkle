@@ -1,0 +1,36 @@
+{
+  "name": "@mini-labo/mini-merkle",
+  "version": "0.0.1",
+  "description": "small merkle tree builder for mini-labo",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "napi": {
+    "name": "mini-merkle",
+    "triples": {
+      "additional": [
+        "x86_64-unknown-linux-musl"
+      ]
+    }
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.3",
+    "ava": "^6.0.1"
+  },
+  "ava": {
+    "timeout": "3m"
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform",
+    "prepublishOnly": "napi prepublish -t npm",
+    "test": "ava",
+    "universal": "napi universal",
+    "version": "napi version"
+  },
+  "packageManager": "yarn@4.2.2"
+}

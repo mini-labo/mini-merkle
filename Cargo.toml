@@ -1,0 +1,25 @@
+[package]
+edition = "2021"
+name = "mini-labo_mini-merkle"
+version = "0.0.1"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
+napi = { version = "2.12.2", default-features = false, features = ["napi4"] }
+napi-derive = "2.12.2"
+ethers = "1.0"
+tiny-keccak = { version= "2.0.0", features = ["keccak"] }
+rayon = "1.5"
+rand = "0.8"
+num-bigint = "0.4"
+num-traits = "0.2"
+
+[build-dependencies]
+napi-build = "2.0.1"
+
+[profile.release]
+lto = true
+strip = "symbols"
