@@ -16,9 +16,12 @@ rayon = "1.5"
 rand = "0.8"
 num-bigint = "0.4"
 num-traits = "0.2"
+prost = "0.9"
+prost-types = "0.9"
 
 [build-dependencies]
 napi-build = "2.0.1"
+prost-build = "0.9"
 
 [profile.release]
 lto = true

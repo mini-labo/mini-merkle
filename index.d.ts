@@ -7,6 +7,8 @@ export class MerkleTree {
   constructor(leaves: Array<Array<number>>)
   root(): Array<number>
   generateProof(leafIndex: number): Array<Array<number>> | null
+  toProtobuf(): Array<number>
+  static fromProtobuf(bytes: Uint8Array): MerkleTree
   /** build a "bytes32" equivalent padded leaf containing seven numbers */
   static numbersToLeaf(numbers: Array<number>): Array<number>
   /** convert a "bytes32" equivalent padded leaf back to original number array */
