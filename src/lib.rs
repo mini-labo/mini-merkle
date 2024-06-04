@@ -211,4 +211,10 @@ mod test {
             }
         }
     }
+
+    #[test]
+    fn converts_numbers() {
+        let first_ticket = numbers_to_encoded_bytes_leaf(&[1, 2, 3, 4, 5, 6, 7]);
+        assert_eq!(encoded_bytes_leaf_to_numbers(&first_ticket), vec![1, 2, 3, 4, 5, 6, 7]);
+    }
 }
