@@ -1,8 +1,8 @@
 import crypto from 'crypto';
-import { MerkleTree } from './index.js';
+import { MerkleTreeWrapper as MerkleTree } from './index.js';
 import { assert } from 'console';
 
-const NUMBER_OF_LEAVES = 500_000;
+const NUMBER_OF_LEAVES = 100_000;
 
 console.log(`generating merkle tree with ${NUMBER_OF_LEAVES} leaves of 7 random numbers`);
 
@@ -16,25 +16,53 @@ console.timeEnd('native (.rs) leaf generation');
 
 console.time('native (.rs) tree generation');
 const tree =  new MerkleTree(nativeLeaves);
-console.log(`generated tree with root: ${byteArrayToHexString(tree.root())}`);
+console.log(`generated tree with root: ${byteArrayToHexString(tree.getRoot())}`);
 console.timeEnd('native (.rs) tree generation');
 
 console.time('protobuf serialize');
 const buf = tree.toProtobuf();
 console.timeEnd('protobuf serialize');
 
+console.time('naive json (raw obj)');
+const naiveJson = JSON.stringify(tree);
+console.log(naiveJson.length);
+console.timeEnd('naive json (raw obj)');
+
+console.time('fetch data for js');
+const javascriptTree = {
+  root: tree.getRoot(),
+  nodes: tree.getNodes(),
+  leaves: tree.getLeaves()
+}
+console.timeEnd('fetch data for js');
+
+console.time('fetch only leaves for js');
+const leaves = tree.getLeaves();
+console.timeEnd('fetch only leaves for js');
+console.time('serialize leaves');
+const jleaves = JSON.stringify(leaves);
+console.log(jleaves.length);
+console.timeEnd('serialize leaves');
+
+console.time('json serialize');
+const json = JSON.stringify(javascriptTree);
+console.log(json.length);
+console.timeEnd('json serialize');
+//
+
 console.time('protobuf deserialize');
 const reconstitutedTree = MerkleTree.fromProtobuf(new Uint8Array(buf));
 console.timeEnd('protobuf deserialize');
-assert(tree.root() === reconstitutedTree.root());
+console.log(`original root: ${byteArrayToHexString(tree.getRoot())}`)
+console.log(`reconstituted root: ${byteArrayToHexString(reconstitutedTree.getRoot())}`)
 
-console.log('generating 100,000 sets of 7 random numbers (node)')
-console.time('node random number generation');
-const nodeNumbers = generateCollection(100_000, 7);
-console.timeEnd('node random number generation');
-console.log(`generated ${nodeNumbers.length} sets of numbers`);
+console.time('rebuilding from leaf data only TEST');
+// javascript leaf data retrieved from getter
+const newTree = new MerkleTree(leaves);
+console.log('new tree root: ', byteArrayToHexString(newTree.getRoot()));
+console.timeEnd('rebuilding from leaf data only TEST');
 
-
+assert(byteArrayToHexString(tree.getRoot()) === byteArrayToHexString(reconstitutedTree.getRoot()));
 
 function byteArrayToHexString(bytes) {
   return '0x' + Array.from(bytes, byte => {

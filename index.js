@@ -310,6 +310,6 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { MerkleTree } = nativeBinding
+const { MerkleTreeWrapper } = nativeBinding
 
-module.exports.MerkleTree = MerkleTree
+module.exports.MerkleTreeWrapper = MerkleTreeWrapper

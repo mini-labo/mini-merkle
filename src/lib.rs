@@ -31,10 +31,15 @@ impl From<U8Array32> for Vec<u8> {
 }
 
 #[napi]
+pub struct MerkleTreeWrapper {
+    inner: MerkleTree
+}
+
+#[derive(Debug)]
 struct MerkleTree {
-  leaves: Vec<[u8; 32]>,
-  nodes: Vec<Vec<[u8; 32]>>,
-  root: [u8; 32],
+  pub leaves: Vec<[u8; 32]>,
+  pub nodes: Vec<Vec<[u8; 32]>>,
+  pub root: [u8; 32],
 }
 
 fn keccak256(input: &[u8]) -> [u8; 32] {
@@ -81,7 +86,7 @@ fn encoded_bytes_leaf_to_numbers(encoded_leaf: &[u8; 32]) -> Vec<u8> {
 }
 
 #[napi]
-impl MerkleTree {
+impl MerkleTreeWrapper {
   #[napi(constructor)]
   pub fn new(leaves: Vec<Vec<u8>>) -> Self {
     let leaves: Vec<[u8; 32]> = leaves
@@ -126,30 +131,52 @@ impl MerkleTree {
 
     let root = current_level.first().copied().unwrap_or([0; 32]);
 
-    MerkleTree {
-      leaves,
-      nodes,
-      root,
-    }
+    MerkleTreeWrapper {
+        inner: MerkleTree {
+                root,
+                nodes,
+                leaves
+            }
+        }
   }
 
   #[napi]
-  pub fn root(&self) -> Vec<u8> {
-    self.root.to_vec()
+  pub fn get_root(&self) -> Vec<u8> {
+    self.inner.root.to_vec()
+  }
+
+  #[napi]
+  pub fn get_nodes(&self) -> Vec<Vec<Vec<u8>>> {
+    self
+      .inner
+      .nodes
+      .par_iter()
+      .map(|level| level.iter().map(|node| node.to_vec()).collect())
+      .collect::<Vec<Vec<Vec<u8>>>>()
+  }
+
+  #[napi]
+  pub fn get_leaves(&self) -> Vec<Vec<u8>> {
+    self
+      .inner
+      .leaves
+      .par_iter()
+      .map(|leaf| leaf.to_vec())
+      .collect::<Vec<Vec<u8>>>()
   }
 
   #[napi]
   pub fn generate_proof(&self, leaf_index: u32) -> Option<Vec<Vec<u8>>> {
     let leaf_index = leaf_index as usize;
 
-    if leaf_index >= self.leaves.len() {
+    if leaf_index >= self.inner.leaves.len() {
       return None;
     }
 
     let mut proof = Vec::new();
     let mut index = leaf_index;
 
-    for level in &self.nodes {
+    for level in &self.inner.nodes {
       if level.len() == 1 {
         break;
       }
@@ -169,8 +196,9 @@ impl MerkleTree {
   #[napi]
   pub fn to_protobuf(&self) -> Vec<u8> {
     let mut tree = mini::merkle::MerkleTree::default();
-    tree.leaves = self.leaves.iter().map(|leaf| leaf.to_vec()).collect();
+    tree.leaves = self.inner.leaves.iter().map(|leaf| leaf.to_vec()).collect();
     tree.levels = self
+      .inner
       .nodes
       .iter()
       .map(|level| {
@@ -179,7 +207,7 @@ impl MerkleTree {
         level_msg
       })
       .collect();
-    tree.root = self.root.to_vec();
+    tree.root = self.inner.root.to_vec();
 
     let mut buf = Vec::new();
     buf.reserve(tree.encoded_len());
@@ -220,11 +248,13 @@ impl MerkleTree {
     let mut root = [0u8; 32];
     root.copy_from_slice(&tree.root);
 
-    MerkleTree {
-      leaves,
-      nodes,
-      root,
-    }
+    MerkleTreeWrapper {
+            inner: MerkleTree {
+                root,
+                nodes,
+                leaves
+            }
+        }
   }
 
   #[napi]
@@ -255,7 +285,7 @@ mod test {
 
     let deterministic_leaves = vec![first_ticket, second_ticket, third_ticket];
 
-    let merkle_tree = MerkleTree::new(
+    let merkle_tree = MerkleTreeWrapper::new(
       deterministic_leaves
         .into_iter()
         .map(|a| a.to_vec())
@@ -263,7 +293,7 @@ mod test {
     );
 
     let expected_root = "0x91a79b79542123017284587e3c5de1a872908f07ea670fd59e6342f5a1f229ba";
-    let root = merkle_tree.root();
+    let root = merkle_tree.inner.root;
     assert_eq!(hex::encode(&root), &expected_root[2..]);
 
     let expected_proofs = vec![
@@ -305,7 +335,7 @@ mod test {
 
     let deterministic_leaves = vec![first_ticket, second_ticket, third_ticket];
 
-    let merkle_tree = MerkleTree::new(
+    let merkle_tree = MerkleTreeWrapper::new(
       deterministic_leaves
         .into_iter()
         .map(|a| a.to_vec())
@@ -313,9 +343,9 @@ mod test {
     );
 
     let proto = merkle_tree.to_protobuf();
-    let reconstituted_tree = MerkleTree::from_protobuf(&proto);
+    let reconstituted_tree = MerkleTreeWrapper::from_protobuf(&proto);
 
-    assert_eq!(merkle_tree.root, reconstituted_tree.root);
-    assert_eq!(merkle_tree.root, reconstituted_tree.root);
+    assert_eq!(merkle_tree.inner.root, reconstituted_tree.inner.root);
+    assert_eq!(merkle_tree.inner.root, reconstituted_tree.inner.root);
   }
 }
